@@ -26,8 +26,14 @@ from imutils import face_utils
 ########################## New Dependencies ###################################
 
 
+####################### Haar Cascade ##########################################
+haar_cascade_path = os.path.join(os.getcwd(),'haarcascade_eye.xml')
+eye_cascade = cv2.CascadeClassifier(haar_cascade_path)
+####################### Haar Cascade ##########################################
 
-
+image_path = os.path.join(os.getcwd(),'output/Images')
+if not os.path.exists(image_path):
+    os.makedirs(image_path)
 
 def parse_args():
     """Parse input arguments."""
@@ -73,7 +79,7 @@ if __name__ == '__main__':
     cnn_face_detector = dlib.cnn_face_detection_model_v1(args.face_model)
 
     ############################### Dlib face to landmark ############################
-    face_to_landmark  = dlib.predictor(shape_path)
+    face_to_landmark  = dlib.shape_predictor(shape_path)
     ############################### Dlib face to landmark ############################
 
 
@@ -157,43 +163,74 @@ if __name__ == '__main__':
                 x_max = min(frame.shape[1], x_max); y_max = min(frame.shape[0], y_max)
                 # Crop image
                 img = cv2_frame[y_min:y_max,x_min:x_max]
-                img = Image.fromarray(img)
+                width_new, height_new = img.shape[:2]
+
+
 
                 #################### Img to grayscale #########################
                 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)   ### Check this line
                 color = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
-                #################### Img to grayscale #########################
 
+                #################### Img to grayscale #########################
+                img = Image.fromarray(img)
                 # Transform
                 img = transformations(img)
                 img_shape = img.size()
                 img = img.view(1, img_shape[0], img_shape[1], img_shape[2])
                 img = Variable(img).cuda(gpu)
 
-                assert img.size()[0] > 1 , 'Concatinate the image'
+                # assert img.size()[0] > 1 , 'Concatinate the image'
 
                
 
                 #################### Face to eyes #############################
-                shape = face_to_landmark(gray, det)
-                landmarks = face_utils.shape_to_np(shape)
+                landmarks = face_to_landmark(color, det.rect)
+                landmarks = eye_utils.shape_to_landmarks(landmarks)
                 #################### Face to eyes #############################
 
+                #################### Face to eyes Haar Cascade ################
+                eye_HC = []
+                eyes = eye_cascade.detectMultiScale(gray)
+                for i,(ex,ey,ew,eh) in enumerate(eyes):
+                    ex+=x_min
+                    ey+=y_min
+                    cv2.rectangle(frame,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+                    eye_HC.append(frame[ey:ey+eh,ex:ex+ew])
+                eye_HC = np.array(eye_HC)
+                if (eye_HC.shape[0]>0):
+                    left_eye_HC = eye_HC[0]
+                    if(i>0):
+                        right_eye_HC = eye_HC[1]
+                    else:
+                        right_eye_HC = np.zeros((eh,ew,3))
+                #################### Face to eyes Haar Cascade ################
+                if (frame_num%10==0):
+                    cv2.imwrite(image_path + '/'+ 'Left_eye_{}.jpg'.format(frame_num), left_eye_HC) 
+                    cv2.imwrite(image_path + '/'+'Right_eye_{}.jpg'.format(frame_num), right_eye_HC) 
 
 
                 #################### Detect Eyes  #############################
-                right_eye = landmarks[36:42]
-                left_eye = landmarks[42:48]
-                #################### Detect Eyes ##############################
+                right_eye = landmarks[36:42,:]
+                left_eye = landmarks[42:48,:]
+                
+                # print np.amax(right_eye,axis=-1)
+                # print right_eye[1][0],right_eye[1][1],right_eye
 
+                
+                #################### Detect Eyes ##############################
+               
                 #################### Bounding box eye #########################
                 left,right = eye_utils.get_bounding_box(right_eye,left_eye,color)
-                left = left.resize()
-                right = right.resize()
+
+                # left = left.resize()
+                # right = right.resize()
                 #################### Bounding box eye #########################
 
                 #################### Conventional Eye Pose ####################
                 # To do
+                # left_eye_deviation = eye_utils.deviation(left)
+                # right_eye_deviation = eye_utils.deviation(right)
+
                 #################### Conventional Eye Pose ####################
 
                 #################### Deep learning Eye Pose ###################
@@ -221,11 +258,21 @@ if __name__ == '__main__':
                 txt_out.write(str(frame_num) + ' %f %f %f\n' % (yaw_predicted, pitch_predicted, roll_predicted))
                 # utils.plot_pose_cube(frame, yaw_predicted, pitch_predicted, roll_predicted, (x_min + x_max) / 2, (y_min + y_max) / 2, size = bbox_width)
                 utils.draw_axis(frame, yaw_predicted, pitch_predicted, roll_predicted, tdx = (x_min + x_max) / 2, tdy= (y_min + y_max) / 2, size = bbox_height/2)
+
                 # Plot expanded bounding box
                 # cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0,255,0), 1)
+                
+                ################# Drawing detected eye rectangle ##########################
+                # cv2.rectangle(color,(x_min,y_min),(x_max,y_max),(0,255,0),1)
+                # cv2.rectangle(frame,(int(left[2]),int(left[3])),(int(left[0]),int(left[1])),(0,255,0),1)
+                # cv2.rectangle(frame,(int(right[2]),int(right[3])),(int(right[0]),int(right[1])),(0,255,0),1)
+                for i in range(36,42):
+                    cv2.circle(frame, (int(landmarks[i][0]),int(landmarks[i][1])), 1, (0, 0, 255), -1)
+                for i in range(42,48):
+                    cv2.circle(frame, (int(landmarks[i][0]),int(landmarks[i][1])), 1, (0, 0, 255), -1)
 
-        
-        
+                ################# Drawing detected eye rectangle ##########################
+            
                 cv2.putText(img = frame, text = "Roll:"+ str(roll_predicted), org = (100,50), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
                 cv2.putText(img = frame, text = "Yaw:"+ str(yaw_predicted), org = (100,80), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
                 cv2.putText(img = frame, text = "Pitch:"+ str(pitch_predicted), org = (100,110), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
