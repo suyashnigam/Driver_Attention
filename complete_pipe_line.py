@@ -232,6 +232,21 @@ if __name__ == '__main__':
                 img = img.view(1, img_shape[0], img_shape[1], img_shape[2])
                 img = Variable(img).cuda(gpu)
 
+
+                yaw, pitch, roll = model(img)
+
+                yaw_predicted = F.softmax(yaw)
+                pitch_predicted = F.softmax(pitch)
+                roll_predicted = F.softmax(roll)
+                # Get continuous predictions in degrees.
+
+                ##################### Check This #####################################
+                yaw_predicted = torch.sum(yaw_predicted.data[0] * idx_tensor) * 3 - 99
+                pitch_predicted = torch.sum(pitch_predicted.data[0] * idx_tensor) * 3 - 99
+                roll_predicted = torch.sum(roll_predicted.data[0] * idx_tensor) * 3 - 99
+                ##################### Check This #####################################
+
+
                 # assert img.size()[0] > 1 , 'Concatinate the image'
 
                
@@ -266,6 +281,8 @@ if __name__ == '__main__':
                     gaze_centre= (gaze_x,gaze_y)
 
                     gaze_angle,gaze_vector = GazeUtil.GazeAngle(eye_centre,face_centre,gaze_centre,face_rad)
+
+                    GazeUtil.draw_gaze(frame, gaze_angle,pitch, tdx = gaze_x, tdy= gaze_y)
                     cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*num_eye), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
 
 
@@ -346,19 +363,7 @@ if __name__ == '__main__':
 
 
 
-                yaw, pitch, roll = model(img)
-
-                yaw_predicted = F.softmax(yaw)
-                pitch_predicted = F.softmax(pitch)
-                roll_predicted = F.softmax(roll)
-                # Get continuous predictions in degrees.
-
-                ##################### Check This #####################################
-                yaw_predicted = torch.sum(yaw_predicted.data[0] * idx_tensor) * 3 - 99
-                pitch_predicted = torch.sum(pitch_predicted.data[0] * idx_tensor) * 3 - 99
-                roll_predicted = torch.sum(roll_predicted.data[0] * idx_tensor) * 3 - 99
-                ##################### Check This #####################################
-
+             
 
                 # Print new frame with cube and axis
                 txt_out.write(str(frame_num) + ' %f %f %f\n' % (yaw_predicted, pitch_predicted, roll_predicted))

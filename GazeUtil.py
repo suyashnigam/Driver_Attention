@@ -189,5 +189,21 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 
 	return Gaze_angle,Gaze_Vector
 
+
+def draw_gaze(img, angle,pitch, tdx=None, tdy=None, size = 30):
+
+	Gaze = -(angle * np.pi / 180)
+	pitch = pitch*np.pi/180
+
+ 
+
+    # Z-Axis (out of the screen) drawn in blue
+    x = size * (sin(Gaze)) + tdx
+    y = size * (-cos(Gaze) * sin(pitch)) + tdy
+
+    cv2.line(img, (int(tdx), int(tdy)), (int(x),int(y)),(255,0,0),2)
+
+
+
 if __name__ == '__main__':
 	main()
