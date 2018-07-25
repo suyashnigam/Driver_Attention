@@ -339,29 +339,6 @@ if __name__ == '__main__':
 
 
 
-                #################### Detect Eye deep learning + gaze #################
-
-               
-                #################### Bounding box eye #########################
-                # left,right = eye_utils.get_bounding_box(right_eye,left_eye,color)
-
-                # left = left.resize()
-                # right = right.resize()
-                #################### Bounding box eye #########################
-
-                #################### Conventional Eye Pose ####################
-                # To do
-                # left_eye_deviation = eye_utils.deviation(left)
-                # right_eye_deviation = eye_utils.deviation(right)
-
-                #################### Conventional Eye Pose ####################
-
-                #################### Deep learning Eye Pose ###################
-                # To do
-                #################### Deep learning Eye Pose ###################
-
-
-
 
              
 
