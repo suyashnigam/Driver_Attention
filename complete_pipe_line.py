@@ -282,7 +282,7 @@ if __name__ == '__main__':
 
                     gaze_angle,gaze_vector = GazeUtil.GazeAngle(eye_centre,face_centre,gaze_centre,face_rad)
 
-                    GazeUtil.draw_gaze(frame, gaze_angle,pitch, tdx = gaze_x, tdy= gaze_y)
+                    GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1])
                     cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*num_eye), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
 
 
