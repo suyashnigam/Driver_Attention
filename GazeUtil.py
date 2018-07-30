@@ -191,36 +191,36 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 	Gaze_magnitude = np.sqrt(Gaze_Vector[0]*Gaze_Vector[0]+Gaze_Vector[1]*Gaze_Vector[1]+Gaze_Vector[2]*Gaze_Vector[2])
 	Eye_magnitude = np.sqrt(Eye_Vector[0]*Eye_Vector[0]+Eye_Vector[1]*Eye_Vector[1]+Eye_Vector[2]*Eye_Vector[2])
 
-	Gaze_angle = np.arccos(Gaze_Vector[0]/Gaze_magnitude)
-	Eye_angle = np.arccos(Eye_Vector[0]/Eye_magnitude)
+	Gaze_angle = np.arccos(Gaze_Vector[0]/face_rad)
+	Eye_angle = np.arccos(Eye_Vector[0]/face_rad)
 
 	Gaze_angle *= 180/np.pi
 	Eye_angle *=180/np.pi
 
-	if Gaze_angle>90:
-		Gaze_angle-=90
+	# if Gaze_angle>90:
+	# 	Gaze_angle-=90
 
-	if Eye_angle>90:
-		Eye_angle-=90
-
-
+	# if Eye_angle>90:
+	# 	Eye_angle-=90
 
 
-	return Gaze_angle-Eye_angle,Gaze_Vector
 
 
-def draw_gaze(img, angle,pitch, tdx=None, tdy=None, size = 30):
+	return Gaze_angle,Gaze_Vector
+
+
+def draw_gaze(img, angle,pitch, tdx ,tdy, size = 100.0):
 
 	Gaze = -(angle * np.pi / 180)
 	pitch = pitch*np.pi/180
 
- 
 
-    # Z-Axis (out of the screen) drawn in blue
-    x = size * (sin(Gaze)) + tdx
-    y = size * (-cos(Gaze) * sin(pitch)) + tdy
+	x = size * (np.sin(Gaze)) + tdx
+	y = size * (-np.cos(Gaze) * np.sin(pitch)) + tdy
 
-    cv2.line(img, (int(tdx), int(tdy)), (int(x),int(y)),(255,0,0),2)
+	
+
+	cv2.line(img, (int(tdx), int(tdy)), (int(x),int(y)),(255,0,0),2)
 
 
 
