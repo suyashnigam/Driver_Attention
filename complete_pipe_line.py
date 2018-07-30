@@ -53,6 +53,7 @@ def parse_args():
           default='', type=str)
     parser.add_argument('--save',dest='save',type=bool,default=True)
     parser.add_argument('--save_freq',dest='save_freq',type=int,default=10000000000)
+    parser.add_argument('--eye_mode',dest='eye_mode',type=int,default=1,help='1 for Conventional 2 for deep learning')
 
     ####################### SSD based face detection ###########################################################
     parser.add_argument('--SSD_p', dest='SSD_protoxt',help='PAth to the SSD protoxt file')
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     shape_path = args.shape_model
     save = args.save
     save_freq = args.save_freq
+    eye_mode = args.eye_mode
 
     ssd_p_path = args.SSD_protoxt
     ssd_m_path = args.SSD_model
@@ -250,29 +252,20 @@ if __name__ == '__main__':
 
 
               
-                #################### Face to eyes #############################
-                # landmarks = face_to_landmark(color, det.rect)
-                # landmarks = eye_utils.shape_to_landmarks(landmarks)
-                #################### Face to eyes #############################
-                # eye = []
-                # ymin_eye = []
-                # xmin_eye = []
-                # xmax_eye = []
-                # ymax_eye = []
-                #################### Face to eyes Haar Cascade ################
+                if eye_mode == 1:
                 
-                objectsize_min = (60,60)
-                objectsize_max = (120,120)
-                eyes = eye_cascade.detectMultiScale(gray_equalized,scaleFactor=1.02,minNeighbors=3,minSize=objectsize_min,maxSize=objectsize_max)
-                for num_eye,(ex,ey,ew,eh) in enumerate(eyes):
-                    xmin_eye = ex + x_min
-                    ymin_eye = ey + y_min
-                    xmax_eye = xmin_eye + ew
-                    ymax_eye = ymin_eye + eh
-                    cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
-                    # ymin_eye = ey+y_min
-                    # xmin_eye = ex+x_min
-                    print ('Eye detected')
+                    objectsize_min = (60,60)
+                    objectsize_max = (120,120)
+                    eyes = eye_cascade.detectMultiScale(gray_equalized,scaleFactor=1.02,minNeighbors=3,minSize=objectsize_min,maxSize=objectsize_max)
+                    for num_eye,(ex,ey,ew,eh) in enumerate(eyes):
+                        xmin_eye = ex + x_min
+                        ymin_eye = ey + y_min
+                        xmax_eye = xmin_eye + ew
+                        ymax_eye = ymin_eye + eh
+                        cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
+                        # ymin_eye = ey+y_min
+                        # xmin_eye = ex+x_min
+                        print ('Eye detected')
 
                     # eye = frame[ey:ey+eh,ex:ex+ew]
                     # gaze_x,gaze_y = GazeUtil.getGaze(eye)
@@ -285,9 +278,6 @@ if __name__ == '__main__':
                     
                 #################### Face to eyes Haar Cascade ################
                  
-
-                    GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1])
-                    cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*num_eye), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
 
 
 
@@ -315,17 +305,17 @@ if __name__ == '__main__':
                 # print right_eye[1][0],right_eye[1][1],right_eye
                 #################### Detect Eyes ##############################
 
-
+                else:
                 #################### Detect Eye deep learning  #################
-                # boxes,scores = forward_ssd.bbox_eye(gray)
-                # width_gray,height_gray = gray.shape
-                # for i in range(0,2):
-                #      if scores[i]>0.5:
-                #          ymin_eye = int(boxes[i][0]*height_gray) + y_min
-                #          xmin_eye = int(boxes[i][1]*width_gray)  + x_min
-                #          ymax_eye = int(boxes[i][2]*height_gray) + y_min
-                #          xmax_eye = int(boxes[i][3]*width_gray)  + x_min           
-                #          cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
+                    boxes,scores = forward_ssd.bbox_eye(gray)
+                    width_gray,height_gray = gray.shape
+                    for i in range(0,2):
+                          if scores[i]>0.5:
+                              ymin_eye = int(boxes[i][0]*height_gray) + y_min
+                              xmin_eye = int(boxes[i][1]*width_gray)  + x_min
+                              ymax_eye = int(boxes[i][2]*height_gray) + y_min
+                              xmax_eye = int(boxes[i][3]*width_gray)  + x_min           
+                              cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
 
 
                 #################### Gaze Calculation ###########################
