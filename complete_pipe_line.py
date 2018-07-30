@@ -274,7 +274,6 @@ if __name__ == '__main__':
                     # xmin_eye = ex+x_min
                     print ('Eye detected')
 
-
                     # eye = frame[ey:ey+eh,ex:ex+ew]
                     # gaze_x,gaze_y = GazeUtil.getGaze(eye)
                     # gaze_y+= ey
@@ -286,6 +285,10 @@ if __name__ == '__main__':
                     
                 #################### Face to eyes Haar Cascade ################
                  
+
+                    GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1])
+                    cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*num_eye), fontFace = cv2.FONT_HERSHEY_DUPLEX, fontScale = 1, color = (0, 0, 0))         
+
 
 
                 # eye = np.array(eye)
