@@ -251,22 +251,29 @@ if __name__ == '__main__':
                 #################### Calculation of head pose #################
 
 
-              
+                eye = []
+                xmin_eye = []
+                ymin_eye = []
+                eye_centre = []
                 if eye_mode == 1:
-                
+
+                    num_eye = 0
                     objectsize_min = (60,60)
                     objectsize_max = (120,120)
                     eyes = eye_cascade.detectMultiScale(gray_equalized,scaleFactor=1.02,minNeighbors=3,minSize=objectsize_min,maxSize=objectsize_max)
-                    for num_eye,(ex,ey,ew,eh) in enumerate(eyes):
-                        xmin_eye = ex + x_min
-                        ymin_eye = ey + y_min
-                        xmax_eye = xmin_eye + ew
-                        ymax_eye = ymin_eye + eh
-                        cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
+                    for i,(ex,ey,ew,eh) in enumerate(eyes):
+                        xmin_eye.append(ex + x_min)
+                        ymin_eye.append(ey + y_min)
+                        xmax_eye = xmin_eye[i] + ew
+                        ymax_eye = ymin_eye[i] + eh
+                        
+                        eye.append(frame[ymin_eye[i]:ymax_eye,xmin_eye[i]:xmax_eye])
+                        eye_centre.append(((xmin_eye[i]+xmax_eye)/2,(ymin_eye[i]+ymax_eye)/2))
+                        cv2.rectangle(frame,(xmin_eye[i],ymin_eye[i]),(xmax_eye,ymax_eye),(0,255,0),2)
                         # ymin_eye = ey+y_min
                         # xmin_eye = ex+x_min
                         print ('Eye detected')
-
+                        num_eye+=1
                     # eye = frame[ey:ey+eh,ex:ex+ew]
                     # gaze_x,gaze_y = GazeUtil.getGaze(eye)
                     # gaze_y+= ey
@@ -308,35 +315,32 @@ if __name__ == '__main__':
                 else:
                 #################### Detect Eye deep learning  #################
                     boxes,scores = forward_ssd.bbox_eye(gray)
+                    num_eye = 0
                     width_gray,height_gray = gray.shape
                     for i in range(0,2):
                           if scores[i]>0.5:
-                              ymin_eye = int(boxes[i][0]*height_gray) + y_min
-                              xmin_eye = int(boxes[i][1]*width_gray)  + x_min
-                              ymax_eye = int(boxes[i][2]*height_gray) + y_min
-                              xmax_eye = int(boxes[i][3]*width_gray)  + x_min           
-                              cv2.rectangle(frame,(xmin_eye,ymin_eye),(xmax_eye,ymax_eye),(0,255,0),2)
-
+                              ymin_eye.append(int(boxes[i][0]*height_gray) + y_min)
+                              xmin_eye.append(int(boxes[i][1]*width_gray)  + x_min)
+                              ymax_eye = int(boxes[i][2]*height_gray) + y_min[i]
+                              xmax_eye = int(boxes[i][3]*width_gray)  + x_min[i]           
+                              cv2.rectangle(frame,(xmin_eye[i],ymin_eye[i]),(xmax_eye,ymax_eye),(0,255,0),2)
+                              eye.append(frame[ymin_eye[i]:ymax_eye,xmin_eye[i]:xmax_eye])
+                              eye_centre.append(((xmin_eye[i]+xmax_eye)/2,(ymin_eye[i]+ymax_eye)/2))
+                              num_eye+=1
+                eye = np.array(eye)
+               
 
                 #################### Gaze Calculation ###########################
-                eye = frame[ymin_eye:ymax_eye,xmin_eye:xmax_eye] 
-                gaze_x,gaze_y = python_iris.getGaze(eye)
-                gaze_y+= ymin_eye
-                gaze_x+= xmin_eye
-                cv2.circle(frame, (gaze_x,gaze_y), 5, 255, -1)
-                eye_centre = ((xmin_eye+xmax_eye)/2,(ymin_eye+ymax_eye)/2)
-                gaze_centre = (gaze_x,gaze_y)
-                #################### Gaze Calculation ###########################
-
-
-
-
-
-                ######################## Geometric Calculations ####################
-                gaze_angle,gaze_vector,eye_angle = GazeUtil.GazeAngle(eye_centre,face_centre,gaze_centre,face_rad)
-                GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1])
-                GazeUtil.draw_gaze(frame, eye_angle,pitch_predicted, tdx = eye_centre[0], tdy= eye_centre[1])
-                cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*num_eye), fontFace = cv2.FONT_HERSHEY_DUPLEX
+                for i in range(0,num_eye):
+                    gaze_x,gaze_y = GazeUtil.getGaze(eye[i])
+                    gaze_y+= ymin_eye[i]
+                    gaze_x+= xmin_eye[i]
+                    cv2.circle(frame, (gaze_x,gaze_y), 5, 255, -1)
+                    gaze_centre = (gaze_x,gaze_y)
+                    gaze_angle,gaze_vector,eye_angle = GazeUtil.GazeAngle(eye_centre[i],face_centre,gaze_centre,face_rad)
+                    GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1],marker=0)
+                    GazeUtil.draw_gaze(frame, eye_angle,pitch_predicted, tdx = eye_centre[i][0], tdy= eye_centre[i][1],marker=1)
+                    cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*i), fontFace = cv2.FONT_HERSHEY_DUPLEX,fontScale = 1, color = (0, 0, 0)) 
                 ######################## Geometric Calculations ####################
 
 
