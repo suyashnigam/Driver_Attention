@@ -179,11 +179,11 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 	Gaze_Vector = np.zeros(3)
 	Eye_Vector = np.zeros(3)
 
-	Gaze_Vector[0] = Gaze[0] - origin_shifted[0]
+	Gaze_Vector[0] = np.abs(Gaze[0] - origin_shifted[0])
 	Gaze_Vector[1] = Gaze[1] - origin_shifted[1]
 	Gaze_Vector[2] = Gaze[2] - origin_shifted[2]
 
-	Eye_Vector[0] = Eye[0] - origin_shifted[0]
+	Eye_Vector[0] = np.abs(Eye[0] - origin_shifted[0])
 	Eye_Vector[1] = Eye[1] - origin_shifted[1]
 	Eye_Vector[2] = Eye[2] - origin_shifted[2]
 
@@ -194,8 +194,14 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 	Gaze_angle = np.arccos(Gaze_Vector[0]/face_rad)
 	Eye_angle = np.arccos(Eye_Vector[0]/face_rad)
 
-	Gaze_angle *= 180/np.pi
-	Eye_angle *=180/np.pi
+	if Gaze[0] > origin_shifted[0]:
+		Gaze_angle *= 180/np.pi
+		Eye_angle *=180/np.pi
+
+	else:
+		Gaze_angle *= 180/np.pi + 90
+		Eye_angle *=180/np.pi + 90
+
 
 	# if Gaze_angle>90:
 	# 	Gaze_angle-=90
@@ -206,7 +212,7 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 
 
 
-	return Gaze_angle,Gaze_Vector
+	return Gaze_angle,Gaze_Vector,Eye_angle
 
 
 def draw_gaze(img, angle,pitch, tdx ,tdy, size = 100.0):
