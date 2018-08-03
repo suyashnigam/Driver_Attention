@@ -159,49 +159,56 @@ def getGaze(image):
 
 	# return x,y
 
-def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
+def GazeAngle(eye_centre,gaze_centre,eye_rad):
 	origin = [0,0,0]
-	X,Y,Z = face_centre[0],face_centre[1],face_rad 
-	Y_shifted = Y-eye_centre[1]
-	origin_shifted = [0,Y_shifted,0]
+	X,Y,Z = eye_centre[0],eye_centre[1],eye_rad 
+	
+	origin_shifted = [0,Y,0]
 
-	X_gaze_shifted = X - gaze_centre[0]
-	Y_gaze_shifted = Y - gaze_centre[1]
+	X_gaze_shifted = gaze_centre[0] - X
+	Y_gaze_shifted = gaze_centre[1] - Y
 	Z_gaze_shifted = Z 
 
-	X_eye_shifted = X - eye_centre[0]
-	Y_eye_shifted = X - eye_centre[1]
+	X_eye_shifted = -X + eye_centre[0]
+	Y_eye_shifted = -Y + eye_centre[1]
 	Z_eye_shifted = Z
 
 	Gaze = [X_gaze_shifted,Y_gaze_shifted,Z_gaze_shifted]
 	Eye = [X_eye_shifted,Y_eye_shifted,Z_eye_shifted]
 
 	Gaze_Vector = np.zeros(3)
-	Eye_Vector = np.zeros(3)
+	# Eye_Vector = np.zeros(3)
 
-	Gaze_Vector[0] = np.abs(Gaze[0] - origin_shifted[0])
+	Gaze_Vector[0] = Gaze[0] - origin_shifted[0]
 	Gaze_Vector[1] = Gaze[1] - origin_shifted[1]
 	Gaze_Vector[2] = Gaze[2] - origin_shifted[2]
 
-	Eye_Vector[0] = np.abs(Eye[0] - origin_shifted[0])
-	Eye_Vector[1] = Eye[1] - origin_shifted[1]
-	Eye_Vector[2] = Eye[2] - origin_shifted[2]
+	# Eye_Vector[0] = Eye[0] - origin_shifted[0]
+	# Eye_Vector[1] = Eye[1] - origin_shifted[1]
+	# Eye_Vector[2] = Eye[2] - origin_shifted[2]
 
 
 	Gaze_magnitude = np.sqrt(Gaze_Vector[0]*Gaze_Vector[0]+Gaze_Vector[1]*Gaze_Vector[1]+Gaze_Vector[2]*Gaze_Vector[2])
-	Eye_magnitude = np.sqrt(Eye_Vector[0]*Eye_Vector[0]+Eye_Vector[1]*Eye_Vector[1]+Eye_Vector[2]*Eye_Vector[2])
+	# Eye_magnitude = np.sqrt(Eye_Vector[0]*Eye_Vector[0]+Eye_Vector[1]*Eye_Vector[1]+Eye_Vector[2]*Eye_Vector[2])
 
-	Gaze_angle = np.arccos(Gaze_Vector[0]/face_rad)
-	Eye_angle = np.arccos(Eye_Vector[0]/face_rad)
+	Gaze_angle = np.arcsin(Gaze[0]/eye_rad)
+	# Eye_angle = np.arcsin(Eye_Vector[0]/eye_rad)
 
-	if Gaze[0] > origin_shifted[0]:
-		Gaze_angle *= 180/np.pi
-		Eye_angle *=180/np.pi
+	Gaze_angle_pitch = np.arcsin(Gaze[1]/eye_rad)
+	# Eye_angle_pitch = np.arcsin(Eye_Vector[1]/eye_rad)
 
-	else:
-		Gaze_angle *= 180/np.pi + 90
-		Eye_angle *=180/np.pi + 90
+	# if Gaze[0] > origin_shifted[0]:
+	# 	Gaze_angle *= 180/np.pi
+	# 	Eye_angle *=180/np.pi
 
+	# else:
+	# 	Gaze_angle *= 180/np.pi + 90
+	# 	Eye_angle *=180/np.pi + 90
+
+	Gaze_angle*=180/np.pi
+	# Eye_angle*=180/np.pi
+	Gaze_angle_pitch *=180/np.pi
+	# Eye_angle_pitch *=180/np.pi
 
 	# if Gaze_angle>90:
 	# 	Gaze_angle-=90
@@ -212,17 +219,17 @@ def GazeAngle(eye_centre,face_centre,gaze_centre,face_rad):
 
 
 
-	return Gaze_angle,Gaze_Vector,Eye_angle
+	return (Gaze_angle,Gaze_angle_pitch),Gaze_Vector
 
 
 def draw_gaze(img, angle,pitch, tdx ,tdy, marker,size = 100.0):
 
-	Gaze = -(angle * np.pi / 180)
+	Gaze =  angle * np.pi / 180
 	pitch = pitch*np.pi/180
 
-
+	
 	x = size * (np.sin(Gaze)) + tdx
-	y = size * (-np.cos(Gaze) * np.sin(pitch)) + tdy
+	y = size * (np.sin(pitch)) + tdy
 
 	
 	if (marker==0):

@@ -218,6 +218,7 @@ if __name__ == '__main__':
 
                 face_centre = ((x_min+x_max)/2,(y_min+y_max)/2)
                 face_rad = (x_max - x_min)/2
+
                 #################### Img to grayscale #########################
                 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)   ### Check this line
                 color = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
@@ -252,6 +253,7 @@ if __name__ == '__main__':
 
 
                 eye = []
+                eye_rad = []
                 xmin_eye = []
                 ymin_eye = []
                 eye_centre = []
@@ -266,7 +268,7 @@ if __name__ == '__main__':
                         ymin_eye.append(ey + y_min)
                         xmax_eye = xmin_eye[i] + ew
                         ymax_eye = ymin_eye[i] + eh
-                        
+                        eye_rad.append(ew/2)
                         eye.append(frame[ymin_eye[i]:ymax_eye,xmin_eye[i]:xmax_eye])
                         eye_centre.append(((xmin_eye[i]+xmax_eye)/2,(ymin_eye[i]+ymax_eye)/2))
                         cv2.rectangle(frame,(xmin_eye[i],ymin_eye[i]),(xmax_eye,ymax_eye),(0,255,0),2)
@@ -327,6 +329,7 @@ if __name__ == '__main__':
                               eye.append(frame[ymin_eye[i]:ymax_eye,xmin_eye[i]:xmax_eye])
                               eye_centre.append(((xmin_eye[i]+xmax_eye)/2,(ymin_eye[i]+ymax_eye)/2))
                               num_eye+=1
+                              eye_rad.append((xmax_eye-xmin_eye[i])/2)
                 eye = np.array(eye)
                
 
@@ -337,9 +340,9 @@ if __name__ == '__main__':
                     gaze_x+= xmin_eye[i]
                     cv2.circle(frame, (gaze_x,gaze_y), 5, 255, -1)
                     gaze_centre = (gaze_x,gaze_y)
-                    gaze_angle,gaze_vector,eye_angle = GazeUtil.GazeAngle(eye_centre[i],face_centre,gaze_centre,face_rad)
-                    GazeUtil.draw_gaze(frame, gaze_angle,pitch_predicted, tdx = gaze_centre[0], tdy= gaze_centre[1],marker=0)
-                    GazeUtil.draw_gaze(frame, eye_angle,pitch_predicted, tdx = eye_centre[i][0], tdy= eye_centre[i][1],marker=1)
+                    gaze_angle,gaze_vector = GazeUtil.GazeAngle(eye_centre[i],gaze_centre,eye_rad[i])
+                    GazeUtil.draw_gaze(frame, gaze_angle[0],gaze_angle[1], tdx = gaze_centre[0], tdy= gaze_centre[1],marker=0)
+                    # GazeUtil.draw_gaze(frame, eye_angle[0],eye_angle[1], tdx = eye_centre[i][0], tdy= eye_centre[i][1],marker=1)
                     cv2.putText(img = frame, text = "Gaze Angle: "+ str(gaze_angle),org = (100,150+30*i), fontFace = cv2.FONT_HERSHEY_DUPLEX,fontScale = 1, color = (0, 0, 0)) 
                 ######################## Geometric Calculations ####################
 
