@@ -1,6 +1,6 @@
 # General guildlines for the code  
 
-## src   
+## Master script   
 
 #### complete_pipe_line.py   
 
@@ -23,16 +23,17 @@
 2. Tensorflow > 1.4  
 3. OpenCV 3.0  
 
-* Eye Deep Learning  
+## Eye Deep Learning  
 There is a frozen_inference_grph.pb from a partially trained model, use tensorflow's object detection module to generate .pb model to replace.
 
-* forward_ssd.py
+#### forward_ssd.py
 Takes in cropped face image from face detection model and detects eye using the trained deep learning model. (loads a .pb file for inference)
 
-* ssd_config.config
+#### ssd_config.config
 The parameters for training the module
 
-*python_iris.py  
+## Gaze Detection
+#### python_iris.py  
 This script calculates the iris coordinates using a cropped out eye image.  
 Hyperparameters:-  (default)
 1. Blur_size : Kernel size of Gaussian Blur (3)
@@ -42,3 +43,11 @@ Hyperparameters:-  (default)
 5. postpro = Boolean for pose processsing or not (True).
 6. new_width = Width of scaled down image for detection, a smaller image leads to faster computation. (20)
 
+## Utilities  
+
+#### dataset_util.py  
+
+To create an object detection database from kaggle facial landmark database.  
+* Parser
+> python dataset_util.py --l 0.8 --r 0.2
+l and r describe the eye bbox heurestics.
