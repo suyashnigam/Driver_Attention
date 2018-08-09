@@ -4,13 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import time
 from skimage import io
-# from PIL import image
 
-# def scale(img,fast_width):
-# 	img = cv2.resize(img,(fast_width,fast_width))
-# 	return img
-
-## CONSTANTS
 Blur_size = 3
 PostConstant = 0.97
 thresholdGradient = 50.0
@@ -24,25 +18,14 @@ def computeGradient(img,dir):
 	if dir=='x':
 		grad = cv2.Sobel(img,cv2.CV_32F,dx=1,dy=0,ksize=3)
 		
-		# cv2.imwrite('gradx.jpg',grad)
-		# grad = cv2.normalize(grad, grad, -127.0, 127.0, cv2.NORM_MINMAX, cv2.CV_8U)
-
 	else:
 		grad = cv2.Sobel(img,cv2.CV_32F,dx=0,dy=1,ksize=3)
-		# print ("Gradient Y", grad)
-
-		# cv2.imwrite('grady.jpg',grad)
-
-		# grad = cv2.normalize(grad, grad, -127.0, 127.0, cv2.NORM_MINMAX, cv2.CV_8U)
-
+		
 	return grad
 
 def preprocess(img,new_width=20):
 	img = cv2.GaussianBlur(img,(Blur_size,Blur_size),0)
 	h, w = img.shape
-	# r = new_width / w
-	# dim = (new_width, int(h * r))
-	# img = cv2.resize(img, dim, interpolation = cv2.INTER_LINEAR)
 	img = cv2.resize(img, (new_width,new_width), interpolation = cv2.INTER_LINEAR)
 	return img
 
@@ -114,8 +97,7 @@ def findCenter(img):
 	super_threshold_indices = score > thresh
 	score[super_threshold_indices] = 0
 	score_new = normalize(score)
-	# cv2.imshow("score",score_new)
-	# cv2.waitKey(0)
+	
 	return np.unravel_index(np.argmax(score),score.shape)
 
 def normalize(score):
@@ -132,8 +114,7 @@ def relative(x,y,img):
 	return x,y
 
 def getGaze(image):
-	# print ("Finding gaze centre")
-	# img = cv2.imread('4.jpg',0)
+	
 	print (image.shape)
 	img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	print (img.shape)
@@ -142,9 +123,7 @@ def getGaze(image):
 	
 	
 
-	# print "Prior to scaling:",x,y
-	# img = cv2.resize(img, (new_width,new_width), interpolation = cv2.INTER_LINEAR)
-	# cv2.imwrite("Orignal.jpg",img)
+	
 	x_new,y_new = relative(x,y,img)
 	cv2.circle(img, (x_new,y_new), 1, 255, -1)
 
@@ -152,12 +131,6 @@ def getGaze(image):
 
 	return x_new,y_new
 
-	# cv2.imwrite('4_gaze.jpg', img)
-	# img = cv2.resize(img, (new_width,new_width), interpolation = cv2.INTER_LINEAR)
-	# cv2.circle(img, (x,y), 1, 255, -1)
-	# cv2.imwrite('unscaled.jpg',img)
-
-	# return x,y
-
+	
 if __name__ == '__main__':
 	main()

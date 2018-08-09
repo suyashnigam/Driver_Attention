@@ -112,19 +112,6 @@ def plot(l,r):
 
 
 
-	# 	cv2.rectangle(image,(left_x_min,left_y_min),(left_x_max,left_y_max),(0,255,0),1)
-	# 	cv2.rectangle(image,(right_x_min,right_y_min),(right_x_max,right_y_max),(0,255,0),1)
-
-	# 	plt.subplot(4,4,j%16+1)
-	# 	plt.imshow(image,cmap='gray')
-	# 	plt.title('Image ID {}'.format(i),fontsize=12)
-	# 	j+=1
-	# plt.suptitle('The value of l and r is {} and {}'.format(l,r),fontsize=24)
-	# plt.savefig(save_dir+'.pdf')
-	# plt.show()
-# cv2.imshow('image_4',image)
-# cv2.waitKey(0)
-
 def parse_args():
 	 parser = argparse.ArgumentParser(description="Ratios")
 	 parser.add_argument('--l',dest='l',type=float,default=0.2)
